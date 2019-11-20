@@ -15,8 +15,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.File;
 import java.nio.file.Files;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -95,7 +93,7 @@ public class AzureClient {
   public void templateWithJwtRequest() {
     // https://jwt.io/
     //  'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'
-    String jwt = staticDecodeSha1SumBase64Encode();
+    String jwt = generateJwt();
     MultiValueMap<String,String> data = map(
         "client_id", "535fb089-9ff3-47b6-9bfb-4f1264799865",
         "scope", DEFAULT_GRAPH_SCOPE,
@@ -143,32 +141,32 @@ public class AzureClient {
 
   private static String generateJwt() {
     Algorithm.HMAC256( "Secret" );
-    PublicKey publicKey = publicKey( new File( "publickey.cer.raw" ) );
-    PrivateKey privateKey = privateKey( new File( "privatekey.pem" ) );
-    Algorithm.RSA256( (RSAPublicKey) publicKey, (RSAPrivateKey) privateKey );
+    RSAPublicKey publicKey = publicKey( new File( "publickey.cer.decoded" ) );
+    RSAPrivateKey privateKey = privateKey( new File( "privatekey.pem" ) );
+    Algorithm.RSA256( publicKey, privateKey );
     return "";
   }
 
-  private static PrivateKey privateKey( File privateKey ) {
+  private static RSAPrivateKey privateKey( File privateKey ) {
     try {
       byte[] keyBytes = Files.readAllBytes( privateKey.toPath() );
       PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec( keyBytes );
       KeyFactory kf = KeyFactory.getInstance( "RSA" );
-      return kf.generatePrivate( spec );
+      return (RSAPrivateKey) kf.generatePrivate( spec );
     }
     catch ( Exception e ) {
       throw new RuntimeException( e );
     }
   }
 
-  private static PublicKey publicKey( File publicKey ) {
+  private static RSAPublicKey publicKey( File publicKey ) {
     try {
       byte[] bytes = Files.readAllBytes( publicKey.toPath() );
-      byte[] decoded = base64Decode( new String( bytes ) ).getBytes();
-      System.out.println( new String( decoded ) );
-      X509EncodedKeySpec spec = new X509EncodedKeySpec( decoded );
+//      byte[] decoded = base64Decode( new String( bytes ) ).getBytes();
+      System.out.println( new String( bytes ) );
+      X509EncodedKeySpec spec = new X509EncodedKeySpec( bytes );
       KeyFactory keyFactory = KeyFactory.getInstance( "RSA" );
-      return keyFactory.generatePublic( spec );
+      return (RSAPublicKey) keyFactory.generatePublic( spec );
     }
     catch ( Exception e ) {
       throw new RuntimeException( e );
