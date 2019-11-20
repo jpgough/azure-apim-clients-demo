@@ -1,17 +1,17 @@
 package com.morganstanley.azureapimclientsdemo;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Collections.singletonList;
+import java.util.Base64;
 
 
 @Service
@@ -47,32 +47,35 @@ public class AzureClient {
   }
 
   public void requestToken() {
+    RestTemplate restTemplate = new RestTemplate();
     // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
-    WebClient webClient = WebClient.create( "https://login.microsoftonline.com/2e3601f0-776b-44dc-bfe5-80c351c26702" );
-    MultiValueMap<String,String> multiValueMap = new LinkedMultiValueMap<>();
-    Map<String,List<String>> map = new HashMap<>();
-    map.put( "client_id", singletonList( "6731de76-14a6-49ae-97bc-6eba6914391e" ) );
-    map.put( "scope", singletonList( "user.read" ) );
-    map.put( "client_secret", singletonList( "-c2P90Yav7@]uG@V1qA]1JnnED-]uVQR" ) );
-//    map.put( "client_assertion_type", singletonList( "urn:ietf:params:oauth:client-assertion-type:jwt-bearer" ) );
-//    map.put( "client_assertion", singletonList( "eyJhbGciOiJSUzI1NiIsIng1dCI6Imd4OHRHeXN5amNScUtqRlBuZDdSRnd2d1pJMCJ9" +
-//        ".eyJ{alotofcharactershere}M8U3bSUKKJDEg" ) );
-    map.put( "grant_type", singletonList( "client_credentials" ) );
 
-//    map.put( "response_type", singletonList( "code" ) );
-//    map.put( "redirect_uri", singletonList( "https://jpgough.azure-api.net" ) );
-//    map.put( "response_mode", singletonList( "query" ) );
-//    map.put( "state", singletonList( "12345" ) );
+    MultiValueMap<String,String> data = map( "client_id", "16ead5d7-9392-416a-bde8-1317e8a8d254",
+        "client_secret", "-c2P90Yav7@]uG@V1qA]1JnnED-]uVQR",
+        "scope", "https://graph.microsoft.com/.default",
+        "grant_type", "client_credentials" );
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType( MediaType.APPLICATION_FORM_URLENCODED );
+    HttpEntity<MultiValueMap<String,String>> httpEntity =
+        new HttpEntity<>( new LinkedMultiValueMap<>( data ), headers );
 
-    multiValueMap.putAll( map );
-    String response =
-        webClient.method( HttpMethod.POST )
-                 .uri( "/oauth2/v2.0/token" )
-                 .body( BodyInserters.fromFormData( multiValueMap ) )
-                 .retrieve()
-                 .bodyToMono( String.class )
-                 .block();
-    System.out.println( response );
+    System.out.println( httpEntity );
+    ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+        "https://login.microsoftonline.com/2e3601f0-776b-44dc-bfe5-80c351c26702/oauth2/v2.0/token"
+        , httpEntity, String.class );
+    System.out.println( responseEntity.toString() );
+  }
+
+  private static String base64( String source ) {
+    return Base64.getEncoder().encodeToString( source.getBytes() );
+  }
+
+  private static MultiValueMap<String,String> map( String... keyValues ) {
+    MultiValueMap<String,String> aggregated = new LinkedMultiValueMap<>();
+    for ( int i = 0; i < keyValues.length; i += 2 ) {
+      aggregated.add( keyValues[i], keyValues[i + 1] );
+    }
+    return aggregated;
   }
 
 }
