@@ -9,14 +9,15 @@ import org.springframework.web.client.HttpClientErrorException;
 public class AzureApimClientsDemoApplication {
 
   public static void main( String[] args ) {
-    ConfigurableApplicationContext context =
-        SpringApplication.run( AzureApimClientsDemoApplication.class, args );
-    try {
+    try (
+        ConfigurableApplicationContext context =
+            SpringApplication.run( AzureApimClientsDemoApplication.class, args ) ) {
 
       AzureClient azureClient = context.getBean( AzureClient.class );
       azureClient.accessPositions();
       azureClient.requestToken();
-      context.close();
+      azureClient.getSessions();
+      azureClient.templateWithJwtRequest();
     }
     catch ( HttpClientErrorException e ) {
       System.err.println( e.getResponseHeaders() );
