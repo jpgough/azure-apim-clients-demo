@@ -12,6 +12,7 @@ public class AzureApimClientsDemoApplication {
         SpringApplication.run( AzureApimClientsDemoApplication.class, args );
     AzureClient azureClient = context.getBean( AzureClient.class );
     azureClient.accessPositions();
+    azureClient.requestToken();
   }
 
 }

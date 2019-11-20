@@ -1,0 +1,9 @@
+spring.security.oauth2.client.registration:
+  github:
+    client-id: replace-with-client-id
+    client-secret: replace-with-client-secret
+    scope: read:user,public_repo
+  jpgough:
+    clieant-id: aaa
+    client-secret: aaa
+    scope: aaa
