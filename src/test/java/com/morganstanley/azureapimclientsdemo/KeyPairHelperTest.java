@@ -10,12 +10,13 @@ import static org.junit.Assert.assertNotNull;
 
 public class KeyPairHelperTest {
   @Test
-  public void canReadPrivate() {
-    KeyPairHelper keyPairHelper = new KeyPairHelper();
-
-    File privateKeyFile = new File( "privatekey.pem" );
-    RSAPrivateKey rsaPrivateKey = keyPairHelper.readPrivateKey( privateKeyFile );
-    assertNotNull( rsaPrivateKey );
+  public void canReadPrivate() throws Exception {
+    RSAPrivateKey privateKey = RSA.getPrivateKey( "privatekey.pem" );
+//    KeyPairHelper keyPairHelper = new KeyPairHelper();
+//
+//    File privateKeyFile = new File( "privatekey.pem" );
+//    RSAPrivateKey rsaPrivateKey = keyPairHelper.readPrivateKey( privateKeyFile );
+    assertNotNull( privateKey );
   }
 
   @Test

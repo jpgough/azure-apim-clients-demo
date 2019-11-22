@@ -1,6 +1,8 @@
 package com.morganstanley.azureapimclientsdemo;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
@@ -16,9 +18,23 @@ import static java.util.Arrays.asList;
 public class KeyPairHelper {
 
   public RSAPrivateKey readPrivateKey( File privateKey ) {
+    FileInputStream fis = null;
     try {
-      byte[] keyBytes = Files.readAllBytes( privateKey.toPath() );
-      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec( keyBytes );
+      fis = new FileInputStream( privateKey );
+      DataInputStream dis = new DataInputStream( fis );
+      byte[] keyBytes = new byte[(int) privateKey.length()];
+      dis.readFully( keyBytes );
+      dis.close();
+
+      String temp = new String( keyBytes );
+      String privKeyPEM = temp.replace( "-----BEGIN PRIVATE KEY-----\n", "" );
+      privKeyPEM = privKeyPEM.replace( "-----END PRIVATE KEY-----", "" );
+      //System.out.println("Private key\n"+privKeyPEM);
+
+      Base64.Decoder b64 = Base64.getDecoder();
+      byte[] decoded = b64.decode( privKeyPEM );
+
+      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec( decoded );
       KeyFactory kf = KeyFactory.getInstance( "RSA" );
       return (RSAPrivateKey) kf.generatePrivate( spec );
     }
