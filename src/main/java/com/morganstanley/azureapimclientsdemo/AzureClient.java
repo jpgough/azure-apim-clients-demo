@@ -13,13 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 
 @Service
@@ -27,6 +22,8 @@ public class AzureClient {
   private static final String BASE_TOKEN_URL =
       "https://login.microsoftonline.com/2e3601f0-776b-44dc-bfe5-80c351c26702/oauth2/v2.0/token";
   private static final String DEFAULT_GRAPH_SCOPE = "https://graph.microsoft.com/.default";
+
+  private final KeyPairHelper keyPairHelper = new KeyPairHelper();
 
   private final WebClient webClient;
 
@@ -139,46 +136,12 @@ public class AzureClient {
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6IkxTMHRMUzFDUlVkSlRpQkRSVkpVU1VaSlEwRlVSUzB0TFMwdENrMUpTVU0xYWtORFFXc3JaMEYzU1VKQlowbFZZbXRQUkZwVlIybDVTWEJQTXpGNWJ6aHBSVE0xTUdNM1lqSTBkMFJSV1VwTGIxcEphSFpqVGtGUlJVd0tRbEZCZDJkWlVYaERla0ZLUW1kT1ZrSkJXVlJCYTBaV1RWSk5kMFZSV1VSV1VWRkpSRUZ3VkdJeU1XeE1WazR3V1ZoU2JFMVJPSGRFVVZsRVZsRlJTQXBFUVZwTllqSTFhMkl5TkhoR2VrRldRbWRPVmtKQmIwMUVhekYyWTIxa2FHSnBRbFJrUjBaMVlrZFdOVTFTUVhkRVoxbEVWbEZSVEVSQlpFbFpWMDV5Q2xwSFJqVk5VMUYzU1dkWlNrdHZXa2xvZG1OT1FWRnJRa1pvVm5kaFIzUm9aVzAxZG1RelRuSmhWVUp1WWxkR2NHSkROV3BpTWpCM1NHaGpUazFVYTNnS1RWUkpkMDFVUVhkUFZFMTVWMmhqVGsxcVVYaE5WRVUwVFZSQmQwOVVUWGxYYWtOQ2FFUkZURTFCYTBkQk1WVkZRbWhOUTFGV1ZYaEZla0ZTUW1kT1ZncENRV2ROUTJ4T2RtSlhWWFJWTTFKb1pFZFZlRVI2UVU1Q1owNVdRa0ZqVFVKcmVIWmliVkoyWW1wRldFMUNWVWRCTVZWRlEyZDNUMVJYT1hsYU1rWjFDa2xHVGpCWlZ6VnpXbGhyZUVWRVFVOUNaMDVXUWtGelRVSXdhR2haTW5ScldWaHJlRXBFUVdsQ1oydHhhR3RwUnpsM01FSkRVVVZYUmxoQ2IyRXlSallLWW0wNU0yTXlkSEJSUjJSMFdWZHNjMHh0VG5aaVZFTkNibnBCVGtKbmEzRm9hMmxIT1hjd1FrRlJSVVpCUVU5Q2FsRkJkMmRaYTBObldVVkJlakIwUlFwT1EwOWFlVkZhZHk5amVreEVXbko0Y2l0SVJsaFZOMWREY2xOQk0zRTRXbWt4VjNabmJYTm5WbGxrWTFaWVIySm1aRkUyU0RsSWN6RnRiaTk1VERVNUNuRXdNV3haU1M5NFYxVkpjSFpvYUhvdllVaDBkamN4VFVKWFJUVnNSR1pJSzFGeGR5dExUbll2YzJwblpUQTFVR3BQUjNveGFtaE1kWFp2Y0VwNWFFOEtZMWxGZVVRNVNtVk9RM0JLYldOUWRWTnRObWgzTmk5RVIwdERTalY2Wm01alJTc3JMMVk0UTBGM1JVRkJZVTVVVFVaRmQwaFJXVVJXVWpCUFFrSlpSUXBHVGpWaVJWRjRTSEIyYjA5bVQxbENXbGxXV0Zkb2J6bHRURzQ0VFVJNFIwRXhWV1JKZDFGWlRVSmhRVVpPTldKRlVYaEljSFp2VDJaUFdVSmFXVlpZQ2xkb2J6bHRURzQ0VFVFNFIwRXhWV1JGZDBWQ0wzZFJSazFCVFVKQlpqaDNSRkZaU2t0dldrbG9kbU5PUVZGRlRFSlJRVVJuV1VWQlJYRnBUQzlXWjFZS04xSlJhekpIVDBWTlNsRnFjMDU0Y25GVVRrbEZlVlpEV0hSeFFVeDRhVE5zYjNCMmFDc3paVTl5VTA5R05YSnFWazlCZDBFdlpqVkRRV1l3YkdvMlJRbzJTakEzZGpFeWFXeFVNMFpPU1U1TFRqRnBkRGxWVVhkVVVYcHFaMFZHVjBkM2EycDRjV1ZPWW1neGQwVXlSbFJwYUdOcE9TdDVOSEJhUTBwUU0weG9Da3RqYlZaWFdWRkxWM1ppT1hWek4wWmhaMUpMWXl0bGQwMTJObmRtWlN0VFMwTm5QUW90TFMwdExVVk9SQ0JEUlZKVVNVWkpRMEZVUlMwdExTMHRDZz09In0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.QXcDPnC3YYgmdM0oqLex0mEq1lN3PoLXOsqpw4QndB0";
   }
 
-  private static String generateJwt() {
+  private String generateJwt() {
     Algorithm.HMAC256( "Secret" );
-    RSAPublicKey publicKey = publicKey( new File( "publickey.cer.decoded" ) );
-    RSAPrivateKey privateKey = privateKey( new File( "privatekey.pem" ) );
-    Algorithm.RSA256( publicKey, privateKey );
-    return "";
-  }
-
-  private static RSAPrivateKey privateKey( File privateKey ) {
-    try {
-      byte[] keyBytes = Files.readAllBytes( privateKey.toPath() );
-      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec( keyBytes );
-      KeyFactory kf = KeyFactory.getInstance( "RSA" );
-      return (RSAPrivateKey) kf.generatePrivate( spec );
-    }
-    catch ( Exception e ) {
-      throw new RuntimeException( e );
-    }
-  }
-
-  private static RSAPublicKey publicKey( File publicKey ) {
-    try {
-      byte[] bytes = Files.readAllBytes( publicKey.toPath() );
-//      byte[] decoded = base64Decode( new String( bytes ) ).getBytes();
-      System.out.println( new String( bytes ) );
-      X509EncodedKeySpec spec = new X509EncodedKeySpec( bytes );
-      KeyFactory keyFactory = KeyFactory.getInstance( "RSA" );
-      return (RSAPublicKey) keyFactory.generatePublic( spec );
-    }
-    catch ( Exception e ) {
-      throw new RuntimeException( e );
-    }
-  }
-
-  private static String base64Encode( String source ) {
-    return Base64.getEncoder().encodeToString( source.getBytes() );
-  }
-
-  private static String base64Decode( String source ) {
-    return new String( Base64.getDecoder().decode( source ) );
+    RSAPublicKey publicKey = keyPairHelper.readPublicKey( new File( "publickey.cer" ) );
+    RSAPrivateKey privateKey = keyPairHelper.readPrivateKey( new File( "privatekey.pem" ) );
+    Algorithm algorithm = Algorithm.RSA256( publicKey, privateKey );
+    return null;
   }
 
   private static MultiValueMap<String,String> map( String... keyValues ) {
