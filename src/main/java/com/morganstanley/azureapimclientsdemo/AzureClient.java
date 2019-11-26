@@ -1,6 +1,5 @@
 package com.morganstanley.azureapimclientsdemo;
 
-import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,10 +10,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.io.File;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 
 
 @Service
@@ -90,7 +85,7 @@ public class AzureClient {
   public void templateWithJwtRequest() {
     // https://jwt.io/
     //  'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'
-    String jwt = generateJwt();
+    String jwt = new JwtGenerator().generateJwt();
     MultiValueMap<String,String> data = map(
         "client_id", "535fb089-9ff3-47b6-9bfb-4f1264799865",
         "scope", DEFAULT_GRAPH_SCOPE,
@@ -134,14 +129,6 @@ public class AzureClient {
   private static String staticJwtBase64PubCert() {
     return
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6IkxTMHRMUzFDUlVkSlRpQkRSVkpVU1VaSlEwRlVSUzB0TFMwdENrMUpTVU0xYWtORFFXc3JaMEYzU1VKQlowbFZZbXRQUkZwVlIybDVTWEJQTXpGNWJ6aHBSVE0xTUdNM1lqSTBkMFJSV1VwTGIxcEphSFpqVGtGUlJVd0tRbEZCZDJkWlVYaERla0ZLUW1kT1ZrSkJXVlJCYTBaV1RWSk5kMFZSV1VSV1VWRkpSRUZ3VkdJeU1XeE1WazR3V1ZoU2JFMVJPSGRFVVZsRVZsRlJTQXBFUVZwTllqSTFhMkl5TkhoR2VrRldRbWRPVmtKQmIwMUVhekYyWTIxa2FHSnBRbFJrUjBaMVlrZFdOVTFTUVhkRVoxbEVWbEZSVEVSQlpFbFpWMDV5Q2xwSFJqVk5VMUYzU1dkWlNrdHZXa2xvZG1OT1FWRnJRa1pvVm5kaFIzUm9aVzAxZG1RelRuSmhWVUp1WWxkR2NHSkROV3BpTWpCM1NHaGpUazFVYTNnS1RWUkpkMDFVUVhkUFZFMTVWMmhqVGsxcVVYaE5WRVUwVFZSQmQwOVVUWGxYYWtOQ2FFUkZURTFCYTBkQk1WVkZRbWhOUTFGV1ZYaEZla0ZTUW1kT1ZncENRV2ROUTJ4T2RtSlhWWFJWTTFKb1pFZFZlRVI2UVU1Q1owNVdRa0ZqVFVKcmVIWmliVkoyWW1wRldFMUNWVWRCTVZWRlEyZDNUMVJYT1hsYU1rWjFDa2xHVGpCWlZ6VnpXbGhyZUVWRVFVOUNaMDVXUWtGelRVSXdhR2haTW5ScldWaHJlRXBFUVdsQ1oydHhhR3RwUnpsM01FSkRVVVZYUmxoQ2IyRXlSallLWW0wNU0yTXlkSEJSUjJSMFdWZHNjMHh0VG5aaVZFTkNibnBCVGtKbmEzRm9hMmxIT1hjd1FrRlJSVVpCUVU5Q2FsRkJkMmRaYTBObldVVkJlakIwUlFwT1EwOWFlVkZhZHk5amVreEVXbko0Y2l0SVJsaFZOMWREY2xOQk0zRTRXbWt4VjNabmJYTm5WbGxrWTFaWVIySm1aRkUyU0RsSWN6RnRiaTk1VERVNUNuRXdNV3haU1M5NFYxVkpjSFpvYUhvdllVaDBkamN4VFVKWFJUVnNSR1pJSzFGeGR5dExUbll2YzJwblpUQTFVR3BQUjNveGFtaE1kWFp2Y0VwNWFFOEtZMWxGZVVRNVNtVk9RM0JLYldOUWRWTnRObWgzTmk5RVIwdERTalY2Wm01alJTc3JMMVk0UTBGM1JVRkJZVTVVVFVaRmQwaFJXVVJXVWpCUFFrSlpSUXBHVGpWaVJWRjRTSEIyYjA5bVQxbENXbGxXV0Zkb2J6bHRURzQ0VFVJNFIwRXhWV1JKZDFGWlRVSmhRVVpPTldKRlVYaEljSFp2VDJaUFdVSmFXVlpZQ2xkb2J6bHRURzQ0VFVFNFIwRXhWV1JGZDBWQ0wzZFJSazFCVFVKQlpqaDNSRkZaU2t0dldrbG9kbU5PUVZGRlRFSlJRVVJuV1VWQlJYRnBUQzlXWjFZS04xSlJhekpIVDBWTlNsRnFjMDU0Y25GVVRrbEZlVlpEV0hSeFFVeDRhVE5zYjNCMmFDc3paVTl5VTA5R05YSnFWazlCZDBFdlpqVkRRV1l3YkdvMlJRbzJTakEzZGpFeWFXeFVNMFpPU1U1TFRqRnBkRGxWVVhkVVVYcHFaMFZHVjBkM2EycDRjV1ZPWW1neGQwVXlSbFJwYUdOcE9TdDVOSEJhUTBwUU0weG9Da3RqYlZaWFdWRkxWM1ppT1hWek4wWmhaMUpMWXl0bGQwMTJObmRtWlN0VFMwTm5QUW90TFMwdExVVk9SQ0JEUlZKVVNVWkpRMEZVUlMwdExTMHRDZz09In0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.QXcDPnC3YYgmdM0oqLex0mEq1lN3PoLXOsqpw4QndB0";
-  }
-
-  private String generateJwt() {
-    Algorithm.HMAC256( "Secret" );
-    RSAPublicKey publicKey = keyPairHelper.readPublicKey( new File( "publickey.cer" ) );
-    RSAPrivateKey privateKey = keyPairHelper.readPrivateKey( new File( "privatekey.pem" ) );
-    Algorithm algorithm = Algorithm.RSA256( publicKey, privateKey );
-    return null;
   }
 
   private static MultiValueMap<String,String> map( String... keyValues ) {

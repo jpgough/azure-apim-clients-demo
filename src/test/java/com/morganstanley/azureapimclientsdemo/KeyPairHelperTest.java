@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 public class KeyPairHelperTest {
   @Test
   public void canReadPrivate() throws Exception {
-    RSAPrivateKey privateKey = RSA.getPrivateKey( "privatekey.pem" );
+    RSAPrivateKey privateKey = RSA.getPrivateKey( "domain.key" );
 //    KeyPairHelper keyPairHelper = new KeyPairHelper();
 //
 //    File privateKeyFile = new File( "privatekey.pem" );
@@ -23,7 +23,7 @@ public class KeyPairHelperTest {
   public void canReadPublic() {
     KeyPairHelper keyPairHelper = new KeyPairHelper();
 
-    File publicKeyFile = new File( "publickey.cer" );
+    File publicKeyFile = new File( "domain.crt" );
     RSAPublicKey rsaPublicKey = keyPairHelper.readPublicKey( publicKeyFile );
     assertNotNull( rsaPublicKey );
   }
