@@ -30,3 +30,7 @@ build/
 ### VS Code ###
 .vscode/
 **/*.swp
+private_key.der
+private_key.pem
+public_key.cer
+public_private_key.pfx

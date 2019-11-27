@@ -21,3 +21,10 @@ https://github.com/spring-projects/spring-security/issues/6881
 
 # How OAuth works
 https://www.youtube.com/watch?time_continue=17&v=996OiexHze0&feature=emb_logo
+
+# MSAL4J
+
+The [MSAL4J library](https://github.com/AzureAD/microsoft-authentication-library-for-java/wiki) is the preferred way of connecting to Azure services.
+
+It is also possible to follow the [redirect scenario](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-desktop-app-registration) for your application, if you prefer not to use MSAL4J
+

@@ -14,9 +14,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class AzureClient {
-  private static final String BASE_TOKEN_URL =
+  public static final String BASE_TOKEN_URL =
       "https://login.microsoftonline.com/2e3601f0-776b-44dc-bfe5-80c351c26702/oauth2/v2.0/token";
-  private static final String DEFAULT_GRAPH_SCOPE = "https://graph.microsoft.com/.default";
+  public static final String DEFAULT_GRAPH_SCOPE = "https://graph.microsoft.com/.default";
 
   private final KeyPairHelper keyPairHelper = new KeyPairHelper();
 
