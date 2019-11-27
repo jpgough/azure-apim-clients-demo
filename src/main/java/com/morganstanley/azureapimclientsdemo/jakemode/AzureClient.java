@@ -24,7 +24,7 @@ public class AzureClient {
   void main() throws MalformedURLException {
     // generate with openssl genrsa -out private_key.pem 2048
     PrivateKey privateKey = readPrivateKey( "private_key.der" );
-    X509Certificate publicKey = readPublicCert( "public_key.der" );
+    X509Certificate publicKey = readPublicCert( "public_key.cer" );
 // https://github.com/AzureAD/microsoft-authentication-library-for-java/wiki/Client-Applications
     String CLIENT_ID = "bla";
     String TENANT_SPECIFIC_AUTHORITY = "auth";
