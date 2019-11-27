@@ -11,12 +11,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static com.morganstanley.azureapimclientsdemo.GlobalSettings.BASE_TOKEN_URL;
+import static com.morganstanley.azureapimclientsdemo.GlobalSettings.DEFAULT_GRAPH_SCOPE;
+
 
 @Service
 public class AzureClient {
-  public static final String BASE_TOKEN_URL =
-      "https://login.microsoftonline.com/2e3601f0-776b-44dc-bfe5-80c351c26702/oauth2/v2.0/token";
-  public static final String DEFAULT_GRAPH_SCOPE = "https://graph.microsoft.com/.default";
 
   private final KeyPairHelper keyPairHelper = new KeyPairHelper();
 
