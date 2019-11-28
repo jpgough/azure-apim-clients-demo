@@ -28,3 +28,7 @@ The [MSAL4J library](https://github.com/AzureAD/microsoft-authentication-library
 
 It is also possible to follow the [redirect scenario](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-desktop-app-registration) for your application, if you prefer not to use MSAL4J
 
+
+## Process for jwt
+The client must manually upload the public key to APIM, where on return they receive a bunch of properties (such as client id?).
+THen the client generates a JWT themselves using the info provided and then signs the JWT with their public certificate

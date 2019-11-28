@@ -60,7 +60,7 @@ public class JwtGenerator {
       byte[] keyBytes = Files.readAllBytes( Paths.get( filename ) );
       PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec( keyBytes );
       KeyFactory kf = KeyFactory.getInstance( "RSA" );
-      return kf.generatePrivate( spec );
+      return (RSAPublicKey) kf.generatePrivate( spec );
     }
     catch ( IOException | NoSuchAlgorithmException | InvalidKeySpecException e ) {
       throw new RuntimeException( e );
